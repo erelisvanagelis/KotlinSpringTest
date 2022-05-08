@@ -24,4 +24,32 @@ internal class BankControllerTest {
                 jsonPath("$[0].accountNumber") {value("000")}
             }
     }
+
+    @Test
+    fun `should return specified bank` () {
+        //given
+        val accountNumber = "000"
+
+        //when/then
+        mockMvc.get("/api/banks/$accountNumber")
+            .andDo { print() }
+            .andExpect {
+                status { isOk() }
+                content { contentType(MediaType(MediaType.APPLICATION_JSON)) }
+                jsonPath("$.accountNumber") {value("000")}
+            }
+    }
+
+    @Test
+    fun `should return not found excepsion` () {
+        //given
+        val accountNumber = "doesNotExists"
+
+        //when/then
+        mockMvc.get("/api/banks/$accountNumber")
+            .andDo { print() }
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
 }
