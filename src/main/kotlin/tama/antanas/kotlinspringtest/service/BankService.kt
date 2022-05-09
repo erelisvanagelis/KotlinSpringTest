@@ -8,4 +8,5 @@ import tama.antanas.kotlinspringtest.model.Bank
 class BankService (private val dataSource: BankDataSource) {
     fun getBanks() : Collection<Bank> = dataSource.retrieveBanks()
     fun getBank(id: String) : Bank = dataSource.retrieveBank(id)
+    fun addBank(bank: Bank): Bank = dataSource.createBank(bank)
 }
