@@ -6,7 +6,6 @@ import tama.antanas.kotlinspringtest.datasource.BankDataSource
 import tama.antanas.kotlinspringtest.model.Bank
 
 @Repository
-@Primary
 class NetworkBankDataSource: BankDataSource {
     override fun retrieveBanks(): Collection<Bank> {
         TODO("Not yet implemented")

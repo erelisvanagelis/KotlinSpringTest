@@ -1,10 +1,12 @@
 package tama.antanas.kotlinspringtest.datasource.mock
 
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Repository
 import tama.antanas.kotlinspringtest.datasource.BankDataSource
 import tama.antanas.kotlinspringtest.model.Bank
 
 @Repository
+@Primary
 class MockBankDataSource : BankDataSource {
     val banks = mutableListOf<Bank>(
         Bank("000", 42.0, 9),
