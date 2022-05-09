@@ -9,9 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.*
+import org.springframework.web.servlet.function.RequestPredicates
 import tama.antanas.kotlinspringtest.model.Bank
 
 @SpringBootTest
@@ -92,12 +91,11 @@ internal class BankControllerTest(
 
             //then
             mockMvc.get(baseUrl + bank.accountNumber)
-                .andDo { print() }
                 .andExpect {
-                    status { isOk() }
-                    content { contentType(MediaType(MediaType.APPLICATION_JSON)) }
-                    jsonPath("$.accountNumber") { value(bank.accountNumber) }
-
+                    content {
+                        RequestPredicates.contentType(MediaType.APPLICATION_JSON)
+                        json(objectMapper.writeValueAsString(bank))
+                    }
                 }
         }
 
@@ -118,5 +116,82 @@ internal class BankControllerTest(
         }
     }
 
+    @Nested
+    @DisplayName("PATCH /api/banks")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class PatchBank {
+        @Test
+        fun `should patch bank`() {
+            //given
+            val bank = Bank("000", 3.9, 20)
+
+            //when
+            mockMvc.patch(baseUrl) {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(bank)
+            }
+                .andDo { print() }
+                .andExpect {
+                    status { isOk() }
+                }
+
+            //then
+            mockMvc.get(baseUrl + bank.accountNumber)
+                .andExpect {
+                    content {
+                        contentType(MediaType.APPLICATION_JSON)
+                        json(objectMapper.writeValueAsString(bank))
+                    }
+                }
+        }
+
+        @Test
+        fun `should throw not found exception`() {
+            //given
+            val bank = Bank("tokio nera", 3.9, 20)
+
+            //when
+            mockMvc.patch(baseUrl) {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(bank)
+            }
+                .andDo { print() }
+                .andExpect {
+                    status { isNotFound() }
+                }
+        }
+    }
+
+    @Nested
+    @DisplayName("DELETE /api/banks/{accountNumber}")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class DeleteBank {
+        @Test
+        fun `should delete a bank`() {
+            //given
+            val accountNumber = "000"
+            //when
+            mockMvc.delete("/api/banks/$accountNumber")
+                .andDo { print() }
+                .andExpect {
+                    status { isNoContent() }
+                }
+            //then
+            mockMvc.get("/api/banks/$accountNumber")
+                .andExpect { status { isNotFound() } }
+        }
+
+        @Test
+        fun `should return not found exception`() {
+            //given
+            val accountNumber = "doesn't exist"
+            //when
+            mockMvc.delete("/api/banks/$accountNumber")
+                .andDo { print() }
+                .andExpect {
+                    status { isNotFound() }
+                }
+        }
+    }
 
 }
